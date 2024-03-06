@@ -95,5 +95,9 @@ function Backup-FilesByType {
 # Execute backup based on selections
 Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $selectedTypes -activityLogFilePath $activityLogFilePath -errorLogFilePath $errorLogFilePath
 
+# Backup Browser Bookmarks and Downloads?
+Backup-BrowserData
+
+
 Write-Host "Backup completed successfully. Activity log created at $activityLogFilePath"
 Write-Host "Check $errorLogFilePath for any errors during the backup process."
