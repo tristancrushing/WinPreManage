@@ -33,7 +33,7 @@
     Log files are generated in the C:\Logs directory, detailing the activity and any errors encountered during the execution of the script. These logs include timestamps and descriptions of each operation performed, offering a comprehensive overview of the script's findings.
 
 .NOTES
-    - Version:        1.0
+    - Version:        0.1.0
     - Author:         Tristan McGowan (tristan@ipspy.net)
     - Date:           March 5, 2024
     - Requires:       PowerShell 5.1 or higher
