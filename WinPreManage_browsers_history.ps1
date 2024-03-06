@@ -23,7 +23,7 @@ Ideal for IT professionals, MSPs, and users needing to preserve browser history 
 - Sufficient storage space on the destination drive or directory for the browser history backups.
 
 .NOTES
-Version: 1.0
+Version: 0.1.0
 Author: Tristan McGowan (tristan@ipspy.net)
 Date: March 5, 2024
 
