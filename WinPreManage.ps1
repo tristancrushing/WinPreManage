@@ -24,9 +24,9 @@ Suitable for IT professionals, MSPs, and technically inclined users looking to s
 - Sufficient storage space on the destination drive for the backup data.
 
 .NOTES
-Version: 1.0
-Author: [Your Name]
-Date: [Creation Date]
+Version: 0.1.0
+Author: Tristan McGowan (tristan@ipspy.net)
+Date: March 5, 2024
 
 #>
 # PowerShell script to backup selected types of documents, images, and videos on a GNS pre-managed computer,
