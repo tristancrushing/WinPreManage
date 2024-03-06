@@ -1,5 +1,7 @@
 # WinPreManage Suite
 
+![WinPreManage Logo](WinPreManage-Logo.png)
+
 ## Overview
 The WinPreManage suite is a comprehensive collection of PowerShell scripts developed to assist Managed Service Providers (MSPs) and IT professionals in preparing Windows systems for MSP management. This suite encompasses utilities for data backup, file recovery, browser data management, and disk health assessment. It is uniquely designed to be run from a 32GB or larger USB 2.0 or 3.0 flash drive, which doubles as the backup media. This approach not only facilitates the backup process but also serves as a leave-behind for clients, ensuring they possess a backup of literally everything they need.
 
