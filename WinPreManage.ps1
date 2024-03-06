@@ -29,13 +29,13 @@ Author: Tristan McGowan (tristan@ipspy.net)
 Date: March 5, 2024
 
 #>
-# Include child powershell libs.
-# Source the browser backup script
-. ".\WinPreManage_browsers.ps1"
-
 # PowerShell script to backup selected types of documents, images, and videos on a GNS pre-managed computer,
 # with progress feedback and logging, including a separate error log.
 Set-ExecutionPolicy RemoteSigned # Important Must Be Set
+
+# Include child powershell libs.
+# Source the browser backup script
+. ".\WinPreManage_browsers.ps1"
 
 # Prompt for source, destination, and logs path
 $sourceDrive = Read-Host "Enter the letter of the source drive (e.g., C:\)"
