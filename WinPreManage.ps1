@@ -33,10 +33,6 @@ Date: March 5, 2024
 # with progress feedback and logging, including a separate error log.
 Set-ExecutionPolicy RemoteSigned # Important Must Be Set
 
-# Include child powershell libs.
-# Source the browser backup script
-. ".\WinPreManage_browsers.ps1"
-
 # Prompt for source, destination, and logs path
 $sourceDrive = Read-Host "Enter the letter of the source drive (e.g., C:\)"
 $destDrive = Read-Host "Enter the letter of the destination drive followed by Backup folder path (e.g., G:\Backup\)"
@@ -94,6 +90,10 @@ function Backup-FilesByType {
 
 # Execute backup based on selections
 Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $selectedTypes -activityLogFilePath $activityLogFilePath -errorLogFilePath $errorLogFilePath
+
+# Include child powershell libs.
+# Source the browser backup script
+. ".\WinPreManage_browsers.ps1"
 
 # Backup Browser Bookmarks and Downloads?
 Backup-BrowserData
