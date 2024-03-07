@@ -114,7 +114,7 @@ if ($selections -match "2") { $selectedTypes += $newOfficeDocs }
 if ($selections -match "3") { $selectedTypes += $pdfDocs }
 if ($selections -match "4") { $selectedTypes += $imageFiles }
 if ($selections -match "5") { $selectedTypes += $videoFiles }
-if ($selections -match "6") { $selectedTypes += $oldOfficeDocs + $newOfficeDocs + $pdfDocs + $imageFiles + videoFiles }
+if ($selections -match "6") { $selectedTypes += $oldOfficeDocs + $newOfficeDocs + $pdfDocs + $imageFiles + $videoFiles }
 
 # Execute backup based on selections
 Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $selectedTypes -activityLogFilePath $activityLogFilePath -errorLogFilePath $errorLogFilePath
