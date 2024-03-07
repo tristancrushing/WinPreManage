@@ -86,7 +86,35 @@ function Backup-FilesByType {
     }
 }
 
-# Rest of the script for selections and executing the backup
+# Prompt for source and destination drives
+$sourceDrive = Read-Host "Enter the letter of the source drive (e.g., C:\)"
+$destDrive = Read-Host "Enter the letter of the destination drive followed by Backup folder path (e.g., G:\Backup\)"
+
+# Map document types
+$oldOfficeDocs = @("doc", "xls", "ppt")
+$newOfficeDocs = @("docx", "xlsx", "pptx")
+$pdfDocs = @("pdf")
+$imageFiles = @("jpg", "jpeg", "png", "webp", "bmp")
+$videoFiles = @("mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "mpeg")
+
+# Prompt for types of documents to backup
+Write-Host "Select the types of documents to backup:"
+Write-Host "1 - Old Microsoft Office Documents (.doc, .xls, .ppt)"
+Write-Host "2 - New Microsoft Office Documents (.docx, .xlsx, .pptx)"
+Write-Host "3 - PDF Documents (.pdf)"
+Write-Host "4 - Image Files (.jpg, .jpeg, .png, .webp, .bmp)"
+Write-Host "5 - Video Files (.mp4, .avi, .mov, .wmv, .flv, .mkv, .webm, .mpeg)"
+Write-Host "6 - Everything (All the above)"
+$selections = Read-Host "Enter the numbers corresponding to your choices, separated by commas (e.g., 1,2,4), or select 5 for everything"
+
+# Parse selections
+$selectedTypes = @()
+if ($selections -match "1") { $selectedTypes += $oldOfficeDocs }
+if ($selections -match "2") { $selectedTypes += $newOfficeDocs }
+if ($selections -match "3") { $selectedTypes += $pdfDocs }
+if ($selections -match "4") { $selectedTypes += $imageFiles }
+if ($selections -match "5") { $selectedTypes += $videoFiles }
+if ($selections -match "6") { $selectedTypes += $oldOfficeDocs + $newOfficeDocs + $pdfDocs + $imageFiles + videoFiles }
 
 # Execute backup based on selections
 Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $selectedTypes -activityLogFilePath $activityLogFilePath -errorLogFilePath $errorLogFilePath
@@ -98,6 +126,6 @@ Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $s
 # Backup Browser Bookmarks and Downloads?
 Backup-BrowserData
 
-
+# Write Exit & Script Execution feedback to terminal
 Write-Host "Backup completed successfully. Activity log created at $activityLogFilePath"
 Write-Host "Check $errorLogFilePath for any errors during the backup process."
