@@ -47,10 +47,15 @@
 #>
 # Requires -RunAsAdministrator
 
-# Initialize Logging
+# Ask user for log file location
+$logsPath = Read-Host "Enter the path for logs (e.g., C:\Logs)"
+
+# Initialize Logging Paths
 $dateTimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$activityLogPath = "C:\Logs\DiskHealth_Activity_$dateTimeStamp.log"
-$errorLogPath = "C:\Logs\DiskHealth_Error_$dateTimeStamp.log"
+$activityLogPath = Join-Path -Path $logsPath -ChildPath "DiskHealth_Activity_$dateTimeStamp.log"
+$errorLogPath = Join-Path -Path $logsPath -ChildPath "DiskHealth_Error_$dateTimeStamp.log"
+
+# Define logging func
 
 Function Log-Activity {
     param (
@@ -139,3 +144,38 @@ Function Check-VSSStatus {
     $vssAdminListWriters = & vssadmin list writers | Out-String
     Log-Activity "VSS check: $vssAdminListWriters"
 }
+
+# Ask user which checks to run
+Write-Host "Select the disk health checks to perform:"
+Write-Host "1 - Check Disk Space Usage"
+Write-Host "2 - Check S.M.A.R.T. Status"
+Write-Host "3 - Check File System Integrity"
+Write-Host "4 - Check Disk Performance"
+Write-Host "5 - Check Disk Fragmentation"
+Write-Host "6 - Check Volume Shadow Copy Service (VSS) Status"
+Write-Host "7 - Perform All Checks"
+$selections = Read-Host "Enter the numbers corresponding to your choices, separated by commas (e.g., 1,2,4), or select 7 for all checks"
+
+# Parse selections and run selected checks
+$selectedOptions = $selections.Split(',')
+
+if ('7' -in $selectedOptions -or '1' -in $selectedOptions) {
+    Check-DiskSpaceUsage
+}
+if ('7' -in $selectedOptions -or '2' -in $selectedOptions) {
+    Check-SMARTStatus
+}
+if ('7' -in $selectedOptions -or '3' -in $selectedOptions) {
+    Check-FileSystemIntegrity
+}
+if ('7' -in $selectedOptions -or '4' -in $selectedOptions) {
+    Check-DiskPerformance
+}
+if ('7' -in $selectedOptions -or '5' -in $selectedOptions) {
+    Check-DiskFragmentation
+}
+if ('7' -in $selectedOptions -or '6' -in $selectedOptions) {
+    Check-VSSStatus
+}
+
+Write-Host "Disk health checks completed. Please review the logs at $logsPath for detailed results."
