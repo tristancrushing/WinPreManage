@@ -62,29 +62,35 @@ function Backup-FilesByType {
         $currentFileNumber = 0
         foreach ($file in $files) {
             $currentFileNumber++
-            Write-Host "Processing ($currentFileNumber of $totalFiles): `t $($file.FullName)"
-            try {
-                $destPath = $file.FullName.Replace($sourceDrive, $destDrive)
-                $destDir = [System.IO.Path]::GetDirectoryName($destPath)
-                If (-not (Test-Path -Path $destDir)) {
-                    New-Item -ItemType Directory -Path $destDir | Out-Null
-                }
-                Copy-Item -Path $file.FullName -Destination $destPath -ErrorAction Stop
-                Write-Host "Copied to: `t $destPath"
+            # Calculate relative path and destination path
+            $relativePath = $file.FullName.Substring($sourceDrive.Length)
+            $destPath = Join-Path -Path $destDrive -ChildPath $relativePath
 
-                # Log the file copy action to the activity log
+            # Ensure the destination directory exists
+            $destDir = [System.IO.Path]::GetDirectoryName($destPath)
+            if (-not (Test-Path -Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+
+            Write-Host "Processing ($currentFileNumber of $totalFiles): $($file.FullName) to $destPath"
+            try {
+                Copy-Item -Path $file.FullName -Destination $destPath -Force
+
+                # Log the file copy action to the activity log and terminal
                 $timestampUTC = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
                 $timestampLocal = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-                $logMessage = "[$timestampUTC UTC] / [$timestampLocal LOCAL] - Copied: `t{0}`t to `t{1}" -f $file.FullName, $destPath
+                $logMessage = "[$timestampUTC UTC] / [$timestampLocal LOCAL] - Copied: $($file.FullName) to $destPath"
                 Add-Content -Path $activityLogFilePath -Value $logMessage
+                Write-Host $logMessage
             } catch {
-                # Log the error to the error log
                 $errorMessage = "Error copying $($file.FullName) to $destPath: $($_.Exception.Message)"
                 Add-Content -Path $errorLogFilePath -Value $errorMessage
+                Write-Host $errorMessage
             }
         }
     }
 }
+
 
 # Map document types
 $oldOfficeDocs = @("doc", "xls", "ppt")
