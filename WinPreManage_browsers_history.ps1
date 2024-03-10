@@ -28,31 +28,20 @@ Author: Tristan McGowan (tristan@ipspy.net)
 Date: March 10, 2024
 
 .EXAMPLE
-$backupPath = "C:\Backup\Browsers\History"
-$logsPath = "C:\Logs"
-$browserHistoryBackup = [BrowserHistoryBackup]::new($backupPath, $logsPath)
-$browserHistoryBackup.BackupIEAndEdgeLegacyHistory()
-$browserHistoryBackup.BackupEdgeChromiumHistory()
-$browserHistoryBackup.BackupFirefoxHistory()
-$browserHistoryBackup.BackupOperaHistory()
-$browserHistoryBackup.BackupChromeHistory()
-
-This example demonstrates creating a new instance of the BrowserHistoryBackup class and invoking methods to back up browser history for supported browsers to a specified path.
+# $backupPath = "C:\Backup\Browsers\History"
+# $browserHistoryBackup = [BrowserHistoryBackup]::new($backupPath)
+# $browserHistoryBackup.Invoke-UserInteraction
 
 #>
 class BrowserHistoryBackup {
     [string]$BackupBasePath
     [string]$HistoryBackupPath
 
-    BrowserHistoryBackup([string]$backupBasePath, [string]$logsPath) {
-        Initialize-Logging -logsPath $logsPath
-
+    BrowserHistoryBackup([string]$backupBasePath) {
         $this.BackupBasePath = $backupBasePath
         $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
         # Ensure backup directory exists
         New-Item -ItemType Directory -Path $this.HistoryBackupPath -Force | Out-Null
-
-        Log-Activity "Initialized BrowserHistoryBackup with backup path: $this.HistoryBackupPath"
     }
 
     [void]BackupIEAndEdgeLegacyHistory() {
@@ -136,4 +125,35 @@ class BrowserHistoryBackup {
         Add-Content -Path $global:errorLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): ERROR: $Message"
         Write-Host $Message -ForegroundColor Red
     }
+
+    Function Invoke-UserInteraction {
+        Write-Host "Enter the backup path for browser history:"
+        $backupPath = Read-Host
+        $this.BackupBasePath = $backupPath
+        $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
+        New-Item -ItemType Directory -Path $this.HistoryBackupPath -Force | Out-Null
+
+        Write-Host "Select browsers to backup history from:"
+        Write-Host "1. Internet Explorer / Edge Legacy"
+        Write-Host "2. Edge (Chromium)"
+        Write-Host "3. Firefox"
+        Write-Host "4. Opera"
+        Write-Host "5. Chrome"
+        $browserSelection = Read-Host "Enter the number (Separate multiple choices with commas, e.g., 1,3,5)"
+        
+        $browserSelection.Split(',') | ForEach-Object {
+            switch ($_){
+                "1" { $this.BackupIEAndEdgeLegacyHistory() }
+                "2" { $this.BackupEdgeChromiumHistory() }
+                "3" { $this.BackupFirefoxHistory() }
+                "4" { $this.BackupOperaHistory() }
+                "5" { $this.BackupChromeHistory() }
+                default { Write-Host "Invalid selection." }
+            }
+        }
+    }
 }
+
+# Uncomment the following lines to use the class with user interaction:
+$backupUtility = [BrowserHistoryBackup]::new("")
+$backupUtility.Invoke-UserInteraction
