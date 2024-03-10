@@ -75,11 +75,11 @@ function Backup-FilesByType {
                 # Log the file copy action to the activity log
                 $timestampUTC = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
                 $timestampLocal = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-                $logMessage = "[$timestampUTC UTC] / [$timestampLocal LOCAL] - Copied: `t $($file.FullName) to `t $destPath"
+                $logMessage = "[$timestampUTC UTC] / [$timestampLocal LOCAL] - Copied: `t $(${file.FullName}) to `t $destPath"
                 Add-Content -Path $activityLogFilePath -Value $logMessage
             } catch {
                 # Log the error to the error log
-                $errorMessage = "Error copying `t $($file.FullName) to `t $destPath: `t $($_.Exception.Message)"
+                $errorMessage = "Error copying `t $(${file.FullName}) to `t $destPath: `t $($_.Exception.Message)"
                 Add-Content -Path $errorLogFilePath -Value $errorMessage
             }
         }
