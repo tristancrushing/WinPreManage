@@ -23,13 +23,14 @@ Ideal for IT professionals, MSPs, and users needing to preserve browser history 
 - Sufficient storage space on the destination drive or directory for the browser history backups.
 
 .NOTES
-Version: 0.1.0
+Version: 0.1.1
 Author: Tristan McGowan (tristan@ipspy.net)
-Date: March 5, 2024
+Date: March 10, 2024
 
 .EXAMPLE
 $backupPath = "C:\Backup\Browsers\History"
-$browserHistoryBackup = [BrowserHistoryBackup]::new($backupPath)
+$logsPath = "C:\Logs"
+$browserHistoryBackup = [BrowserHistoryBackup]::new($backupPath, $logsPath)
 $browserHistoryBackup.BackupIEAndEdgeLegacyHistory()
 $browserHistoryBackup.BackupEdgeChromiumHistory()
 $browserHistoryBackup.BackupFirefoxHistory()
@@ -43,11 +44,15 @@ class BrowserHistoryBackup {
     [string]$BackupBasePath
     [string]$HistoryBackupPath
 
-    BrowserHistoryBackup([string]$backupBasePath) {
+    BrowserHistoryBackup([string]$backupBasePath, [string]$logsPath) {
+        Initialize-Logging -logsPath $logsPath
+
         $this.BackupBasePath = $backupBasePath
         $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
         # Ensure backup directory exists
         New-Item -ItemType Directory -Path $this.HistoryBackupPath -Force | Out-Null
+
+        Log-Activity "Initialized BrowserHistoryBackup with backup path: $this.HistoryBackupPath"
     }
 
     [void]BackupIEAndEdgeLegacyHistory() {
@@ -55,7 +60,7 @@ class BrowserHistoryBackup {
         # IE and Edge Legacy use similar paths for history; adjust as necessary
         $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "IE_EdgeLegacy_History"
         Copy-Item -Path $ieHistoryPath -Destination $destPath -Recurse -Force
-        Write-Host "IE/Edge Legacy history backed up successfully to $destPath"
+        Log-Activity "IE/Edge Legacy history backed up successfully to $destPath"
     }
 
     [void]BackupEdgeChromiumHistory() {
@@ -63,9 +68,9 @@ class BrowserHistoryBackup {
         if (Test-Path $edgeHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "EdgeChromium_History"
             Copy-Item -Path $edgeHistoryPath -Destination $destPath -Force
-            Write-Host "Edge (Chromium) history backed up successfully to $destPath"
+            Log-Activity "Edge (Chromium) history backed up successfully to $destPath"
         } else {
-            Write-Host "Edge (Chromium) history file not found."
+            Log-Error "Edge (Chromium) history file not found."
         }
     }
 
@@ -75,9 +80,9 @@ class BrowserHistoryBackup {
         if (Test-Path $firefoxHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Firefox_History"
             Copy-Item -Path $firefoxHistoryPath -Destination $destPath -Force
-            Write-Host "Firefox history backed up successfully to $destPath"
+            Log-Activity "Firefox history backed up successfully to $destPath"
         } else {
-            Write-Host "Firefox history database not found."
+            Log-Error "Firefox history database not found."
         }
     }
 
@@ -86,9 +91,9 @@ class BrowserHistoryBackup {
         if (Test-Path $operaHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Opera_History"
             Copy-Item -Path $operaHistoryPath -Destination $destPath -Force
-            Write-Host "Opera history backed up successfully to $destPath"
+            Log-Activity "Opera history backed up successfully to $destPath"
         } else {
-            Write-Host "Opera history file not found."
+            Log-Error "Opera history file not found."
         }
     }
 
@@ -97,9 +102,38 @@ class BrowserHistoryBackup {
         if (Test-Path $chromeHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Chrome_History"
             Copy-Item -Path $chromeHistoryPath -Destination $destPath -Force
-            Write-Host "Chrome history backed up successfully to $destPath"
+            Log-Activity "Chrome history backed up successfully to $destPath"
         } else {
-            Write-Host "Chrome history file not found."
+            Log-Error "Chrome history file not found."
         }
+    }
+
+    # Define global variables for log paths, initialized later
+    $global:activityLogPath = $null
+    $global:errorLogPath = $null
+
+    Function Initialize-Logging {
+        param (
+            [string]$logsPath
+        )
+        $dateTimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $global:activityLogPath = Join-Path -Path $logsPath -ChildPath "BrowserHistoryBackup_Activity_$dateTimeStamp.log"
+        $global:errorLogPath = Join-Path -Path $logsPath -ChildPath "BrowserHistoryBackup_Error_$dateTimeStamp.log"
+
+        # Create log files
+        New-Item -Path $global:activityLogPath -ItemType File -Force | Out-Null
+        New-Item -Path $global:errorLogPath -ItemType File -Force | Out-Null
+    }
+
+    Function Log-Activity {
+        param ([string]$Message)
+        Add-Content -Path $global:activityLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): $Message"
+        Write-Host $Message
+    }
+
+    Function Log-Error {
+        param ([string]$Message)
+        Add-Content -Path $global:errorLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): ERROR: $Message"
+        Write-Host $Message -ForegroundColor Red
     }
 }
