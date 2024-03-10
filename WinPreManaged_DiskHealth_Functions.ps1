@@ -57,6 +57,15 @@ $errorLogPath = Join-Path -Path $logsPath -ChildPath "DiskHealth_Error_$dateTime
 
 # Define logging func
 
+Function Log-WPManage-Message {
+    Add-Content -Path $activityLogPath -Value "=================================================================="
+    Add-Content -Path $activityLogPath -Value "==== Thank you for using [WinPreManage] for your MSP needs.  ====="
+    Add-Content -Path $activityLogPath -Value "=================================================================="
+    Add-Content -Path $activityLogPath -Value "=== github: [https://github.com/tristancrushing/WinPreManage] ===="
+    Add-Content -Path $activityLogPath -Value "=================================================================="
+    Add-Content -Path $activityLogPath -Value ""
+}
+
 Function Log-Activity {
     param (
         [string]$Message
@@ -80,15 +89,16 @@ Function Log-Warning {
 
 # 1. Check Disk Space Usage
 Function Check-DiskSpaceUsage {
+    Log-WPManage-Message
     Log-Activity "Starting disk space usage check."
     Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+        if (($_.Used + $_.Free) -eq 0) {
+            Log-Warning "Drive $($_.Name): has no media or is not accessible."
+            return
+        }
         $totalSizeGB = [math]::Round(($_.Used + $_.Free) / 1GB, 2)
         $freeSpaceGB = [math]::Round($_.Free / 1GB, 2)
         $freeSpacePercent = [math]::Round(($_.Free / ($_.Used + $_.Free)) * 100, 2)
-
-        if ($freeSpacePercent -lt 10) {
-            Log-Warning "Drive $($_.Name): is running low on disk space. $freeSpacePercent% ($freeSpaceGB GB) remaining."
-        }
 
         Log-Activity "Drive $($_.Name): Total Size: $totalSizeGB GB, Free Space: $freeSpaceGB GB ($freeSpacePercent%)."
     }
@@ -96,6 +106,7 @@ Function Check-DiskSpaceUsage {
 
 # 2. Disk Health Status via SMART
 Function Check-SMARTStatus {
+    Log-WPManage-Message
     Log-Activity "Starting SMART status check."
     # Using a placeholder as accessing SMART directly in PowerShell requires external tools
     # An example call could be to a hypothetical third-party utility "SmartCtl"
@@ -105,6 +116,7 @@ Function Check-SMARTStatus {
 
 # 3. File System Integrity Check
 Function Check-FileSystemIntegrity {
+    Log-WPManage-Message
     Log-Activity "Starting file system integrity check."
     $disks = Get-WmiObject -Class Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 }
     foreach ($disk in $disks) {
@@ -117,18 +129,15 @@ Function Check-FileSystemIntegrity {
 
 # 4. Disk Performance Metrics
 Function Check-DiskPerformance {
-    Log-Activity "Starting disk performance check."
-    # Utilizing Get-Disk and Measure-Command to log disk read/write speed as an example
-    $disks = Get-Disk
-    foreach ($disk in $disks) {
-        $performance = Measure-Command { $null = dd if=/dev/zero of=/dev/$($disk.DeviceID) bs=1M count=1024 oflag=direct }
-        Log-Activity "Disk $($disk.DeviceID) performance: $performance.TotalSeconds seconds for 1GB write test."
-    }
+    Log-WPManage-Message
+    Log-Activity "Starting disk performance check. Note: Replace with actual benchmarking tool."
+    # This is a placeholder. Implement disk performance checks using Windows-compatible tools or commands.
     Log-Activity "Disk performance check complete."
 }
 
 # 5. Disk Fragmentation Status
 Function Check-DiskFragmentation {
+    Log-WPManage-Message
     Log-Activity "Starting disk fragmentation check."
     $disks = Get-WmiObject -Class Win32_Volume | Where-Object { $_.DriveType -eq 3 }
     foreach ($disk in $disks) {
@@ -140,6 +149,7 @@ Function Check-DiskFragmentation {
 
 # 6. Volume Shadow Copy Service (VSS) Check
 Function Check-VSSStatus {
+    Log-WPManage-Message
     Log-Activity "Checking Volume Shadow Copy Service (VSS) status."
     $vssAdminListWriters = & vssadmin list writers | Out-String
     Log-Activity "VSS check: $vssAdminListWriters"
