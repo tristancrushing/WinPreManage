@@ -30,14 +30,18 @@ Date: March 10, 2024
 .EXAMPLE
 # $backupPath = "C:\Backup\Browsers\History"
 # $browserHistoryBackup = [BrowserHistoryBackup]::new($backupPath)
-# $browserHistoryBackup.Invoke-UserInteraction
+# $browserHistoryBackup.InvokeUserInteraction
 
 #>
 class BrowserHistoryBackup {
     [string]$BackupBasePath
     [string]$HistoryBackupPath
 
-    BrowserHistoryBackup([string]$backupBasePath) {
+    BrowserHistoryBackup() {
+        # Constructor no longer requires initial backup path
+    }
+
+    [void]SetupBackupPath([string]$backupBasePath) {
         $this.BackupBasePath = $backupBasePath
         $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
         # Ensure backup directory exists
@@ -49,7 +53,7 @@ class BrowserHistoryBackup {
         # IE and Edge Legacy use similar paths for history; adjust as necessary
         $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "IE_EdgeLegacy_History"
         Copy-Item -Path $ieHistoryPath -Destination $destPath -Recurse -Force
-        Log-Activity "IE/Edge Legacy history backed up successfully to $destPath"
+        Write-Host "IE/Edge Legacy history backed up successfully to $destPath."
     }
 
     [void]BackupEdgeChromiumHistory() {
@@ -57,9 +61,9 @@ class BrowserHistoryBackup {
         if (Test-Path $edgeHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "EdgeChromium_History"
             Copy-Item -Path $edgeHistoryPath -Destination $destPath -Force
-            Log-Activity "Edge (Chromium) history backed up successfully to $destPath"
+            Write-Host "Edge (Chromium) history backed up successfully to $destPath."
         } else {
-            Log-Error "Edge (Chromium) history file not found."
+            Write-Host "Edge (Chromium) history file not found."
         }
     }
 
@@ -69,9 +73,9 @@ class BrowserHistoryBackup {
         if (Test-Path $firefoxHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Firefox_History"
             Copy-Item -Path $firefoxHistoryPath -Destination $destPath -Force
-            Log-Activity "Firefox history backed up successfully to $destPath"
+            Write-Host "Firefox history backed up successfully to $destPath."
         } else {
-            Log-Error "Firefox history database not found."
+            Write-Host "Firefox history database not found."
         }
     }
 
@@ -80,80 +84,57 @@ class BrowserHistoryBackup {
         if (Test-Path $operaHistoryPath) {
             $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Opera_History"
             Copy-Item -Path $operaHistoryPath -Destination $destPath -Force
-            Log-Activity "Opera history backed up successfully to $destPath"
+            Write-Host "Opera history backed up successfully to $destPath."
         } else {
-            Log-Error "Opera history file not found."
+            Write-Host "Opera history file not found."
         }
     }
 
     [void]BackupChromeHistory() {
         $chromeHistoryPath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History"
         if (Test-Path $chromeHistoryPath) {
-            $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Chrome_History"
+            $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Chrome_History.txt"
             Copy-Item -Path $chromeHistoryPath -Destination $destPath -Force
-            Log-Activity "Chrome history backed up successfully to $destPath"
+            Write-Host "Chrome history backed up successfully to $destPath."
         } else {
-            Log-Error "Chrome history file not found."
+            Write-Host "Chrome history file not found."
         }
     }
 
-    # Define global variables for log paths, initialized later
-    $global:activityLogPath = $null
-    $global:errorLogPath = $null
-
-    Function Initialize-Logging {
-        param (
-            [string]$logsPath
-        )
-        $dateTimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $global:activityLogPath = Join-Path -Path $logsPath -ChildPath "BrowserHistoryBackup_Activity_$dateTimeStamp.log"
-        $global:errorLogPath = Join-Path -Path $logsPath -ChildPath "BrowserHistoryBackup_Error_$dateTimeStamp.log"
-
-        # Create log files
-        New-Item -Path $global:activityLogPath -ItemType File -Force | Out-Null
-        New-Item -Path $global:errorLogPath -ItemType File -Force | Out-Null
-    }
-
-    Function Log-Activity {
-        param ([string]$Message)
-        Add-Content -Path $global:activityLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): $Message"
-        Write-Host $Message
-    }
-
-    Function Log-Error {
-        param ([string]$Message)
-        Add-Content -Path $global:errorLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): ERROR: $Message"
-        Write-Host $Message -ForegroundColor Red
-    }
-
-    Function Invoke-UserInteraction {
+    [void]InvokeUserInteraction() {
         Write-Host "Enter the backup path for browser history:"
         $backupPath = Read-Host
-        $this.BackupBasePath = $backupPath
-        $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
-        New-Item -ItemType Directory -Path $this.HistoryBackupPath -Force | Out-Null
+        if (-not [string]::IsNullOrWhiteSpace($backupPath)) {
+            $this.SetupBackupPath($backupPath)
+            $this.BackupBasePath = $backupPath
+            $this.HistoryBackupPath = Join-Path -Path $this.BackupBasePath -ChildPath "History"
+            New-Item -ItemType Directory -Path $this.HistoryBackupPath -Force | Out-Null
 
-        Write-Host "Select browsers to backup history from:"
-        Write-Host "1. Internet Explorer / Edge Legacy"
-        Write-Host "2. Edge (Chromium)"
-        Write-Host "3. Firefox"
-        Write-Host "4. Opera"
-        Write-Host "5. Chrome"
-        $browserSelection = Read-Host "Enter the number (Separate multiple choices with commas, e.g., 1,3,5)"
+            Write-Host "Select browsers to backup history from:"
+            Write-Host "1. Internet Explorer / Edge Legacy"
+            Write-Host "2. Edge (Chromium)"
+            Write-Host "3. Firefox"
+            Write-Host "4. Opera"
+            Write-Host "5. Chrome"
+            $browserSelection = Read-Host "Enter the number (Separate multiple choices with commas, e.g., 1,3,5)"
         
-        $browserSelection.Split(',') | ForEach-Object {
-            switch ($_){
-                "1" { $this.BackupIEAndEdgeLegacyHistory() }
-                "2" { $this.BackupEdgeChromiumHistory() }
-                "3" { $this.BackupFirefoxHistory() }
-                "4" { $this.BackupOperaHistory() }
-                "5" { $this.BackupChromeHistory() }
-                default { Write-Host "Invalid selection." }
+            $browserSelection.Split(',') | ForEach-Object {
+                switch ($_){
+                    "1" { $this.BackupIEAndEdgeLegacyHistory() }
+                    "2" { $this.BackupEdgeChromiumHistory() }
+                    "3" { $this.BackupFirefoxHistory() }
+                    "4" { $this.BackupOperaHistory() }
+                    "5" { $this.BackupChromeHistory() }
+                    default { Write-Host "Invalid selection." }
+                 }
             }
+        } else {
+            Write-Host "Backup path is required to proceed."
         }
     }
+
 }
 
 # Uncomment the following lines to use the class with user interaction:
-$backupUtility = [BrowserHistoryBackup]::new("")
-$backupUtility.Invoke-UserInteraction
+$backupUtility = [BrowserHistoryBackup]::new()
+$backupUtility.InvokeUserInteraction()
