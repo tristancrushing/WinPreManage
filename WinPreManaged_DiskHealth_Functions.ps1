@@ -58,33 +58,39 @@ $errorLogPath = Join-Path -Path $logsPath -ChildPath "DiskHealth_Error_$dateTime
 # Define logging func
 
 Function Log-WPManage-Message {
-    Add-Content -Path $activityLogPath -Value "=================================================================="
-    Add-Content -Path $activityLogPath -Value "==== Thank you for using [WinPreManage] for your MSP needs.  ====="
-    Add-Content -Path $activityLogPath -Value "=================================================================="
-    Add-Content -Path $activityLogPath -Value "=== github: [https://github.com/tristancrushing/WinPreManage] ===="
-    Add-Content -Path $activityLogPath -Value "=================================================================="
-    Add-Content -Path $activityLogPath -Value ""
+    $messageBlock = @(
+        "==================================================================",
+        "==== Thank you for using [WinPreManage] for your MSP needs.  =====",
+        "==================================================================",
+        "=== github: [https://github.com/tristancrushing/WinPreManage] ====",
+        "==================================================================",
+        ""
+    )
+    foreach ($message in $messageBlock) {
+        Add-Content -Path $activityLogPath -Value $message
+        Write-Host $message
+    }
 }
 
 Function Log-Activity {
-    param (
-        [string]$Message
-    )
-    Add-Content -Path $activityLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): $Message"
+    param ([string]$Message)
+    $logMessage = "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): $Message"
+    Add-Content -Path $activityLogPath -Value $logMessage
+    Write-Host $logMessage
 }
 
 Function Log-Error {
-    param (
-        [string]$Message
-    )
-    Add-Content -Path $errorLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): ERROR: $Message"
+    param ([string]$Message)
+    $errorMessage = "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): ERROR: $Message"
+    Add-Content -Path $errorLogPath -Value $errorMessage
+    Write-Host $errorMessage -ForegroundColor Red
 }
 
 Function Log-Warning {
-    param (
-        [string]$Message
-    )
-    Add-Content -Path $activityLogPath -Value "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): WARNING: $Message"
+    param ([string]$Message)
+    $warningMessage = "$(Get-Date -Format "yyyy-MM-dd HH:mm:ss"): WARNING: $Message"
+    Add-Content -Path $activityLogPath -Value $warningMessage
+    Write-Host $warningMessage -ForegroundColor Yellow
 }
 
 # 1. Check Disk Space Usage
