@@ -24,7 +24,7 @@ Suitable for IT professionals, MSPs, and technically inclined users looking to s
 - Sufficient storage space on the destination drive for the backup data.
 
 .NOTES
-Version: 0.1.0
+Version: 0.1.1
 Author: Tristan McGowan (tristan@ipspy.net)
 Date: March 5, 2024
 
