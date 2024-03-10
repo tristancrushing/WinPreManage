@@ -33,9 +33,9 @@
     Log files are generated in the C:\Logs directory, detailing the activity and any errors encountered during the execution of the script. These logs include timestamps and descriptions of each operation performed, offering a comprehensive overview of the script's findings.
 
 .NOTES
-    - Version:        0.1.0
+    - Version:        0.1.1
     - Author:         Tristan McGowan (tristan@ipspy.net)
-    - Date:           March 5, 2024
+    - Date:           March 10, 2024
     - Requires:       PowerShell 5.1 or higher
     - Operating System: Windows 10/Windows Server 2016 or higher
     - Permissions:    Must be run as Administrator due to the administrative privileges required for certain checks (e.g., S.M.A.R.T. status, chkdsk).
@@ -106,7 +106,7 @@ Function Check-FileSystemIntegrity {
         $driveLetter = $disk.DeviceID
         # This is a safer, non-disruptive check compared to chkdsk /f or /r
         $chkdskResult = & chkdsk $driveLetter /scan | Out-String
-        Log-Activity "File system integrity check for $driveLetter: $chkdskResult"
+        Log-Activity "File system integrity check for ${driveLetter}: $chkdskResult"
     }
 }
 
@@ -129,7 +129,7 @@ Function Check-DiskFragmentation {
     foreach ($disk in $disks) {
         $driveLetter = $disk.DriveLetter
         $fragResult = defrag $driveLetter /A /V | Out-String
-        Log-Activity "Disk fragmentation status for $driveLetter: $fragResult"
+        Log-Activity "Disk fragmentation status for ${driveLetter}: $fragResult"
     }
 }
 
