@@ -86,10 +86,6 @@ function Backup-FilesByType {
     }
 }
 
-# Prompt for source and destination drives
-$sourceDrive = Read-Host "Enter the letter of the source drive (e.g., C:\)"
-$destDrive = Read-Host "Enter the letter of the destination drive followed by Backup folder path (e.g., G:\Backup\)"
-
 # Map document types
 $oldOfficeDocs = @("doc", "xls", "ppt")
 $newOfficeDocs = @("docx", "xlsx", "pptx")
