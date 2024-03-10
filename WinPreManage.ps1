@@ -98,6 +98,7 @@ $newOfficeDocs = @("docx", "xlsx", "pptx")
 $pdfDocs = @("pdf")
 $imageFiles = @("jpg", "jpeg", "png", "webp", "bmp")
 $videoFiles = @("mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "mpeg")
+$soundFiles = @("mp3", "wav", "ogg", "flac", "aac", "m4a", "wma")
 
 # Prompt for types of documents to backup
 Write-Host "Select the types of documents to backup:"
@@ -106,7 +107,8 @@ Write-Host "2 - New Microsoft Office Documents (.docx, .xlsx, .pptx)"
 Write-Host "3 - PDF Documents (.pdf)"
 Write-Host "4 - Image Files (.jpg, .jpeg, .png, .webp, .bmp)"
 Write-Host "5 - Video Files (.mp4, .avi, .mov, .wmv, .flv, .mkv, .webm, .mpeg)"
-Write-Host "6 - Everything (All the above)"
+Write-Host "6 - Video Files (.mp3, .wav, .ogg, .flac, .aac, .m4a, .wma)"
+Write-Host "7 - Everything (All the above)"
 $selections = Read-Host "Enter the numbers corresponding to your choices, separated by commas (e.g., 1,2,4), or select 5 for everything"
 
 # Parse selections
@@ -116,7 +118,8 @@ if ($selections -match "2") { $selectedTypes += $newOfficeDocs }
 if ($selections -match "3") { $selectedTypes += $pdfDocs }
 if ($selections -match "4") { $selectedTypes += $imageFiles }
 if ($selections -match "5") { $selectedTypes += $videoFiles }
-if ($selections -match "6") { $selectedTypes += $oldOfficeDocs + $newOfficeDocs + $pdfDocs + $imageFiles + $videoFiles }
+if ($selections -match "6") { $selectedTypes += $soundFiles }
+if ($selections -match "7") { $selectedTypes += $oldOfficeDocs + $newOfficeDocs + $pdfDocs + $imageFiles + $videoFiles + $soundFiles }
 
 # Execute backup based on selections
 Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $selectedTypes -activityLogFilePath $activityLogFilePath -errorLogFilePath $errorLogFilePath
@@ -126,7 +129,7 @@ Backup-FilesByType -sourceDrive $sourceDrive -destDrive $destDrive -fileTypes $s
 . ".\WinPreManage_browsers.ps1"
 
 # Backup Browser Bookmarks and Downloads?
-Backup-BrowserData
+# Backup-BrowserData
 
 # Write Exit & Script Execution feedback to terminal
 Write-Host "Backup completed successfully. Activity log created at $activityLogFilePath"
