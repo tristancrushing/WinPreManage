@@ -11,6 +11,7 @@ Author: Tristan McGowan (trsitan@ipspy.net)
 Date: March 10, 2024
 
 #>
+Set-ExecutionPolicy Unrestricted -Scope Process
 
 # Get the script's current directory
 $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
@@ -35,10 +36,28 @@ if ($missingFiles) {
 }
 
 # Function to get removable drives (omitted for brevity, include your existing implementation)
-# Function Get-RemovableDrives goes here
+function Get-RemovableDrives {
+    Get-WmiObject -Query "SELECT * FROM Win32_DiskDrive WHERE MediaType = 'Removable Media'" | ForEach-Object {
+        $drive = $_
+        Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($drive.DeviceID)'} WHERE AssocClass = Win32_DiskDriveToDiskPartition" | ForEach-Object {
+            $partition = $_
+            Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($partition.DeviceID)'} WHERE AssocClass = Win32_LogicalDiskToPartition" | ForEach-Object {
+                [PSCustomObject]@{
+                    Model = $drive.Model
+                    DeviceID = $_.DeviceID
+                    Description = $_.Description
+                    Size = $_.Size
+                }
+            }
+        }
+    }
+}
 
 # Function to confirm drive selection (omitted for brevity, include your existing implementation)
-# Function Confirm-DriveSelection goes here
+$drives = Get-RemovableDrives
+$drives | ForEach-Object {
+    Write-Host "Found removable drive: $($_.DeviceID) - $($_.Description)"
+}
 
 # Display all removable drives
 $drives = Get-RemovableDrives
@@ -47,6 +66,25 @@ $drives | ForEach-Object { Write-Host $_.DeviceID }
 
 # Ask the user to select a drive
 $selectedDrive = Read-Host "Please enter the drive letter of the USB stick you want to use (e.g., E:\)"
+
+function Confirm-DriveSelection {
+    param (
+        [string]$driveLetter
+    )
+
+    $confirmation = $false
+    $response = Read-Host "You have selected drive $driveLetter. Do you want to proceed? (Y/N)"
+    if ($response -eq 'Y' -or $response -eq 'y') {
+        $confirmation = $true
+    } elseif ($response -eq 'N' -or $response -eq 'n') {
+        $confirmation = $false
+    } else {
+        Write-Host "Invalid input. Please enter Y (yes) or N (no)."
+    }
+
+    return $confirmation
+}
+
 
 # Confirm drive selection
 Confirm-DriveSelection -driveLetter $selectedDrive
