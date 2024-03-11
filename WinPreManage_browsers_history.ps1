@@ -68,16 +68,29 @@ class BrowserHistoryBackup {
     }
 
     [void]BackupFirefoxHistory() {
-        $firefoxProfilePath = Get-ChildItem "$env:APPDATA\Mozilla\Firefox\Profiles" -Directory | Select-Object -First 1
-        $firefoxHistoryPath = $firefoxProfilePath.FullName + "\places.sqlite"
-        if (Test-Path $firefoxHistoryPath) {
-            $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Firefox_History"
-            Copy-Item -Path $firefoxHistoryPath -Destination $destPath -Force
-            Write-Host "Firefox history backed up successfully to $destPath."
+        $firefoxProfilesPath = Join-Path -Path $env:APPDATA -ChildPath "Mozilla\Firefox\Profiles"
+        if (Test-Path $firefoxProfilesPath) {
+            $profileDirs = Get-ChildItem -Path $firefoxProfilesPath -Directory
+            $foundHistoryFile = $false
+
+            foreach ($dir in $profileDirs) {
+                $firefoxHistoryPath = Join-Path -Path $dir.FullName -ChildPath "places.sqlite"
+                if (Test-Path $firefoxHistoryPath) {
+                    $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath ($dir.Name + "_Firefox_History.sqlite")
+                    Copy-Item -Path $firefoxHistoryPath -Destination $destPath -Force
+                    Write-Host "Firefox history from profile '$($dir.Name)' backed up successfully to $destPath."
+                    $foundHistoryFile = $true
+                }
+            }
+
+            if (-not $foundHistoryFile) {
+                Write-Host "Firefox history database not found in any profile."
+            }
         } else {
-            Write-Host "Firefox history database not found."
+            Write-Host "Firefox profiles directory not found. Unable to locate Firefox profile directory."
         }
     }
+
 
     [void]BackupOperaHistory() {
         $operaHistoryPath = "$env:APPDATA\Opera Software\Opera Stable\History"
@@ -93,7 +106,7 @@ class BrowserHistoryBackup {
     [void]BackupChromeHistory() {
         $chromeHistoryPath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History"
         if (Test-Path $chromeHistoryPath) {
-            $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Chrome_History.txt"
+            $destPath = Join-Path -Path $this.HistoryBackupPath -ChildPath "Chrome_History"
             Copy-Item -Path $chromeHistoryPath -Destination $destPath -Force
             Write-Host "Chrome history backed up successfully to $destPath."
         } else {
