@@ -22,6 +22,8 @@ $requiredFiles = @(
     "WinPreManage_FileRecovery.ps1",
     "WinPreManage_browsers.ps1",
     "WinPreManage_browsers_history.ps1",
+    "WinPreManage_launcher.ps1",
+    "WinPreManage_prep_usb.ps1",
     "WinPreManaged_DiskHealth_Functions.ps1"
 )
 
