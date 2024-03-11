@@ -83,7 +83,7 @@ function Backup-FilesByType {
                 Add-Content -Path $activityLogFilePath -Value $logMessage
                 Write-Host $logMessage
             } catch {
-                $errorMessage = "Error copying $($file.FullName) to $destPath: $($_.Exception.Message)"
+                $errorMessage = "Error copying $($file.FullName) to ${destPath}: $($_.Exception.Message)"
                 Add-Content -Path $errorLogFilePath -Value $errorMessage
                 Write-Host $errorMessage
             }
