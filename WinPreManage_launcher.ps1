@@ -22,7 +22,7 @@ function Show-Menu {
     Write-Host "---------------------"
     Write-Host "1: Prepare USB with WinPreManage"
     Write-Host "2: WinPreManage Main Script"
-    Write-Host "3: WinPreManage File Recovery"
+    Write-Host "3: WinPreManage File Recovery (Still in Development)"
     Write-Host "4: WinPreManage Browser Backup"
     Write-Host "5: WinPreManage Browser History Backup"
     Write-Host "6: WinPreManage Disk Health Functions"
@@ -39,8 +39,9 @@ function Show-Menu {
             & "$path\WinPreManage.ps1" 
         }
         '3' { 
-            Set-ExecutionPolicy RemoteSigned -Scope Process -Force
-            & "$path\WinPreManage_FileRecovery.ps1" 
+            Write-Host "This feature is still in development, please check https://github.com/tristancrushing/WinPreManage/ for the latest updates."
+            # Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+            # & "$path\WinPreManage_FileRecovery.ps1" 
         }
         '4' { 
             Set-ExecutionPolicy RemoteSigned -Scope Process -Force
